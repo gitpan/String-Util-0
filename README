@@ -5,39 +5,36 @@ SYNOPSIS
       use String::Util ':all';
   
       # "crunch" whitespace and remove leading/trailing whitespace
-      crunch $val;
+      $val = crunch($val);
   
       # does this value have "content", i.e. it's defined
       # and has something besides whitespace?
       if (hascontent $val) {...}
   
       # format for display in web page
-      htmlesc $val;
+      $val = htmlesc($val);
   
       # remove leading/trailing whitespace
-      trim $val;
+      $val = trim($val);
   
       # ensure defined value
-      define $val;
+      $val = define($val);
   
       # remove leading/trailing quotes
-      unquote $val;
+      $val = unquote($val);
   
       # remove all whitespace
-      nospace $val;
-  
-      # format for use in URL
-      urlencode $val;
-  
-      # decode URL encoded data
-      urldecode $val;
+      $val = nospace($val);
   
       # remove trailing \r and \n, regardless of what
       # the OS considers an end-of-line
+      $val = fullchomp($val);
+  
+      # or call in void context:
       fullchomp $val;
   
       # encrypt string using random seed
-      randcrypt $val;
+      $val = randcrypt($val);
   
       # are these two values equal, where two undefs count as "equal"?
       if (equndef $a, $b) {...}
@@ -46,7 +43,7 @@ SYNOPSIS
       if (neundef $a, $b) {...}
   
       # get a random string of some specified length
-      $val = randword (10);
+      $val = randword(10);
 
 DESCRIPTION
     String::Util provides a collection of small, handy utilities for
@@ -69,9 +66,6 @@ crunch(string)
     removes all leading and trailing whitespace. Undefined input results in
     undefined output.
 
-    In void context modifies the value in place. Otherwise returns the
-    modified value.
-
 hascontent(scalar)
     Returns true if the given argument contains something besides
     whitespace.
@@ -88,19 +82,12 @@ trim(string)
     Returns the string with all leading and trailing whitespace removed.
     Trim on undef returns undef.
 
-    In void context modifies the value in place. Otherwise returns the
-    modified value.
-
 nospace(string)
     Removes all whitespace characters from the given string.
 
-    In void context changes the values in place. Otherwise returns modified
-    value.
-
 htmlesc(string)
     Formats a string for literal output in HTML. An undefined value is
-    returned as an empty string. In void context changes the values in
-    place. Otherwise returns modified value.
+    returned as an empty string.
 
     htmlesc is very similar to CGI.pm's escapeHTML. If your script already
     loads CGI.pm, you may well not need htmlesc. However, there are a few
@@ -116,9 +103,6 @@ unquote(string)
     with same type of quotes or nothing is done to the value. Undef input
     results in undef output.
 
-    In void context changes the values in place. Otherwise returns modified
-    value.
-
 define(scalar)
     Takes a single value as input. If the value is defined, it is returned
     unchanged. If it is not defined, an empty string is returned.
@@ -127,9 +111,6 @@ define(scalar)
     represented as an empty string. Granted, Perl already treats undefs as
     empty strings in string context, but this sub makes -w happy. And you
     ARE using -w, right?
-
-    In void context modifies the value in place. Otherwise returns the
-    modified value.
 
 randword(length, %options)
     Returns a random string of characters. String will not contain any
@@ -153,26 +134,6 @@ neundef($str1, $str2)
     The opposite of equndef, returns true if the two strings are *not* the
     same.
 
-urlencode(string)
-    Returns the string URL encoded. Undef returns an empty string.
-
-    This subroutine works much like CGI.pm's escape function. The main
-    difference is that this sub returns an empty string if an undefined
-    value is input.
-
-urldecode(string)
-    Returns the string URL decoded. Undef returns an empty string.
-
-    In void context modifies the value in place. Otherwise returns the
-    modified value.
-
-    This subroutine works much like CGI.pm's escape function. The main
-    difference is that this sub returns an empty string if an undefined
-    value is input.
-
-    This subroutine also has a bug I haven't been able to fix. See notes in
-    the code.
-
 fullchomp(string)
     Works like chomp, but is a little more thorough about removing \n's and
     \r's even if they aren't part of the OS's standard end-of-line.
@@ -195,4 +156,15 @@ AUTHORS
 VERSION
     Version 0.10 December 1, 2005
         Initial release
+
+    Version 0.11 December 22, 2005
+        This is a non-backwards compatible version.
+
+        urldecode, urlencode were removed entirely. All of the subs that
+        used used to modify values in place were changed so that they do not
+        do so anymore, except for fullchomp.
+
+        See
+        http://www.xray.mpe.mpg.de/mailing-lists/modules/2005-12/msg00112.ht
+        ml for why these changes were made.
 

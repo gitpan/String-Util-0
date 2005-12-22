@@ -2,7 +2,7 @@
 use strict;
 use String::Util ':all';
 use Test;
-BEGIN { plan tests => 12 };
+BEGIN { plan tests => 11 };
 
 # general purpose variable
 my ($val, $org, $new);
@@ -57,11 +57,6 @@ $val = "  Starflower \n\n\t  Miko     ";
 $val = crunch($val);
 comp $val, 'Starflower Miko';
 
-# crunching in void context
-$val = '  steve    frank  ';
-crunch $val;
-comp $val, 'steve frank';
-
 # crunch on undef returns undef
 if (defined crunch(undef))
 	{ err 'crunch', 'returned defined output for undefined input' }
@@ -79,11 +74,6 @@ ok (1);
 # basic trimming
 $val = '  steve     ';
 $val = trim($val);
-comp $val, 'steve';
-
-# triming in void context
-$val = '  steve     ';
-trim $val;
 comp $val, 'steve';
 
 # trim on undef returns undef
@@ -105,11 +95,6 @@ $val = "  Starflower \n\t  Miko   ";
 $val = nospace($val);
 comp $val, 'StarflowerMiko';
 
-# void context
-$val = "  Starflower \n\t  Miko   ";
-nospace $val;
-comp $val, 'StarflowerMiko';
-
 ok (1);
 # 
 # trim
@@ -123,11 +108,6 @@ ok (1);
 # define an undef
 undef $val;
 $val = define($val);
-comp $val, '';
-
-# define in void context
-undef $val;
-define $val;
 comp $val, '';
 
 # define an already defined value
@@ -155,14 +135,9 @@ $val = '"Starflower"';
 $val = unquote($val);
 comp $val, 'Starflower';
 
-# call in void context
-$val = "'Starflower'";
-unquote $val;
-comp $val, 'Starflower';
-
 # no quotes
 $val = 'Starflower';
-unquote $val;
+$val = unquote($val);
 comp $val, 'Starflower';
 
 ok (1);
@@ -185,11 +160,6 @@ undef $val;
 $val = htmlesc($val);
 comp $val, '';
 
-# change undef to empty string, void context
-undef $val;
-htmlesc $val;
-comp $val, '';
-
 ok (1);
 # 
 # htmlesc
@@ -205,44 +175,9 @@ $val = qq|Starflower\n\r\r\r\n|;
 $val = fullchomp($val);
 comp $val, 'Starflower';
 
-# void context
-$val = qq|Starflower\n\r\r\r\n|;
-fullchomp $val;
-comp $val, 'Starflower';
-
 ok (1);
 # 
 # fullchomp
-#------------------------------------------------------------------------------
-
-
-#------------------------------------------------------------------------------
-# urlencode, urldecode
-# 
-$org = 'x+ y=';
-
-# scalar context
-$new = urlencode($org);
-comp $new, 'x%2b+y%3d';
-
-# void context
-$val = $org;
-urlencode $val;
-comp $val, 'x%2b+y%3d';
-
-# decode
-$val = $new;
-$val = urldecode($val);
-comp $val, $org;
-
-# decode
-$val = $new;
-urldecode $val;
-comp $val, $org;
-
-ok(1);
-# 
-# urlencode
 #------------------------------------------------------------------------------
 
 

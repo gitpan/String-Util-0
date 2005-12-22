@@ -5,7 +5,7 @@ use Carp;
 
 # version
 use vars '$VERSION';
-$VERSION = '0.10';
+$VERSION = '0.11';
 
 
 =head1 NAME
@@ -17,39 +17,36 @@ String::Util -- Handy string processing utilities
   use String::Util ':all';
   
   # "crunch" whitespace and remove leading/trailing whitespace
-  crunch $val;
+  $val = crunch($val);
   
   # does this value have "content", i.e. it's defined
   # and has something besides whitespace?
   if (hascontent $val) {...}
   
   # format for display in web page
-  htmlesc $val;
+  $val = htmlesc($val);
   
   # remove leading/trailing whitespace
-  trim $val;
+  $val = trim($val);
   
   # ensure defined value
-  define $val;
+  $val = define($val);
   
   # remove leading/trailing quotes
-  unquote $val;
+  $val = unquote($val);
   
   # remove all whitespace
-  nospace $val;
-  
-  # format for use in URL
-  urlencode $val;
-  
-  # decode URL encoded data
-  urldecode $val;
+  $val = nospace($val);
   
   # remove trailing \r and \n, regardless of what
   # the OS considers an end-of-line
+  $val = fullchomp($val);
+  
+  # or call in void context:
   fullchomp $val;
   
   # encrypt string using random seed
-  randcrypt $val;
+  $val = randcrypt($val);
   
   # are these two values equal, where two undefs count as "equal"?
   if (equndef $a, $b) {...}
@@ -58,7 +55,7 @@ String::Util -- Handy string processing utilities
   if (neundef $a, $b) {...}
   
   # get a random string of some specified length
-  $val = randword (10);
+  $val = randword(10);
 
 =head1 DESCRIPTION
 
@@ -92,8 +89,8 @@ use vars qw[@EXPORT_OK %EXPORT_TAGS @ISA];
 
 # the following functions accept a value and return a modified version of that value
 push @EXPORT_OK, qw[
-	crunch     htmlesc      trim         define      unquote
-	nospace    urlencode    urldecode    fullchomp   randcrypt
+	crunch     htmlesc    trim        define
+    unquote    nospace    fullchomp   randcrypt
 ];
 
 # the following functions return true of false based on their input
@@ -117,9 +114,6 @@ push @EXPORT_OK, qw[ randword ];
 Crunches all whitespace in the string down to single spaces.  Also removes all
 leading and trailing whitespace.  Undefined input results in undefined output.
 
-In void context modifies the value in place.  Otherwise returns the
-modified value.
-
 =cut
 
 sub crunch {
@@ -131,8 +125,7 @@ sub crunch {
 		$val =~ s|\s+| |sg;
 	}
 	
-	defined(wantarray) and return $val;
-	$_[0] = $val;
+	return $val;
 }
 # 
 # crunch
@@ -179,9 +172,6 @@ sub hascontent {
 Returns the string with all leading and trailing whitespace removed.
 Trim on undef returns undef.
 
-In void context modifies the value in place.  Otherwise returns the
-modified value.
-
 =cut
 
 sub trim{
@@ -192,8 +182,7 @@ sub trim{
 		$val =~ s|\s+$||s;
 	};
 	
-	defined(wantarray) and return $val;
-	$_[0] = $val;
+	return $val;
 }
 # 
 # trim
@@ -209,9 +198,6 @@ sub trim{
 
 Removes all whitespace characters from the given string.
 
-In void context changes the values in place.  Otherwise returns
-modified value.
-
 =cut
 
 sub nospace {
@@ -220,8 +206,7 @@ sub nospace {
 	if (defined $val)
 		{ $val =~ s|\s+||gs }
 	
-	defined(wantarray) and return $val;
-	$_[0] = $val;
+	return $val;
 }
 # 
 # nospace
@@ -236,8 +221,7 @@ sub nospace {
 =head1 htmlesc(string)
 
 Formats a string for literal output in HTML.  An undefined value is
-returned as an empty string. In void context changes the values in place. 
-Otherwise returns modified value.
+returned as an empty string.
 
 htmlesc is very similar to CGI.pm's escapeHTML.  If your script already
 loads CGI.pm, you may well not need htmlesc.  However, there are a few
@@ -262,8 +246,7 @@ sub htmlesc{
 	else
 		{$val = ''}
 	
-	defined(wantarray) and return $val;
-	$_[0] = $val;
+	return $val;
 }
 # 
 # htmlesc
@@ -281,9 +264,6 @@ Recognizes single quotes and double quotes.  The value must begin
 and end with same type of quotes or nothing is done to the value.
 Undef input results in undef output.  
 
-In void context changes the values in place.  Otherwise returns
-modified value.
-
 =cut
 
 sub unquote {
@@ -294,8 +274,7 @@ sub unquote {
 		$val =~ s|^\'(.*)\'$|$1|s;
 	}	
 	
-	defined(wantarray) and return $val;
-	$_[0] = $val;
+	return $val;
 }
 # 
 # unquote
@@ -312,19 +291,15 @@ Takes a single value as input. If the value is defined, it is
 returned unchanged.  If it is not defined, an empty string is returned.
 
 This subroutine is useful for printing when an undef should simply be represented
-as an empty string. Granted, Perl already treats undefs as empty strings in
+as an empty string.  Granted, Perl already treats undefs as empty strings in
 string context, but this sub makes -w happy.  And you ARE using -w, right?
-
-In void context modifies the value in place.  Otherwise returns the
-modified value.
 
 =cut
 
 sub define {
 	my ($val) = @_;
 	defined($val) or $val = '';
-	defined(wantarray) and return $val;
-	$_[0] = $val;
+	return $val;
 }
 # 
 # define
@@ -439,76 +414,6 @@ sub neundef {
 #------------------------------------------------------------------------------
 
 
-
-#------------------------------------------------------------------------------
-# urlencode
-# 
-
-=head1 urlencode(string)
-
-Returns the string URL encoded.  Undef returns an empty string.
-
-This subroutine works much like CGI.pm's escape function.  The main
-difference is that this sub returns an empty string if an undefined
-value is input.
-
-=cut
-
-sub urlencode {
-	my ($rv) = @_;
-	defined($rv) or return('');
-	$rv =~ s/([^a-zA-Z0-9 ])/'%'.unpack("H*",$1)/eg;
-	$rv =~ tr/ /+/;
-	
-	defined(wantarray) and return $rv;
-	$_[0] = $rv;
-}
-# 
-# urlencode
-#------------------------------------------------------------------------------
-
-
-#------------------------------------------------------------------------------
-# urldecode
-# 
-
-=head1 urldecode(string)
-
-Returns the string URL decoded.  Undef returns an empty string.
-
-In void context modifies the value in place.  Otherwise returns the
-modified value.
-
-This subroutine works much like CGI.pm's escape function.  The main
-difference is that this sub returns an empty string if an undefined
-value is input.
-
-This subroutine also has a bug I haven't been able to fix. See notes
-in the code.
-
-=cut
-
-sub urldecode{
-	my ($rv) = @_;
-	defined($rv) or return('');
-	$rv =~ s/\+/ /g;
-	
-	# BUG: for certain strings, the following command outputs
-	# the warning "Character in 'c' format wrapped in pack".
-	# As far as I can tell the string is still properly packed,
-	# so I ignore the warning.  Feel free to contact me if you
-	# understand what's going on here.
-	$rv =~ s/%([A-Fa-f0-9]{2})/pack('c',hex($1))/ge;
-	
-	defined(wantarray) and return $rv;
-	$_[0] = $rv;
-}
-
-# 
-# urldecode
-#------------------------------------------------------------------------------
-
-
 #------------------------------------------------------------------------------
 # fullchomp
 # 
@@ -581,6 +486,17 @@ F<miko@idocs.com>
 =item Version 0.10    December 1, 2005
 
 Initial release
+
+=item Version 0.11    December 22, 2005
+
+This is a non-backwards compatible version.
+
+urldecode, urlencode were removed entirely.  All of the subs that used used to
+modify values in place were changed so that they do not do so anymore, except
+for fullchomp.
+
+See http://www.xray.mpe.mpg.de/mailing-lists/modules/2005-12/msg00112.html
+for why these changes were made.
 
 =back
 

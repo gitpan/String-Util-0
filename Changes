@@ -2,3 +2,14 @@ VERSION
     Version 0.10 December 1, 2005
         Initial release
 
+    Version 0.11 December 22, 2005
+        This is a non-backwards compatible version.
+
+        urldecode, urlencode were removed entirely. All of the subs that
+        used used to modify values in place were changed so that they do not
+        do so anymore, except for fullchomp.
+
+        See
+        http://www.xray.mpe.mpg.de/mailing-lists/modules/2005-12/msg00112.ht
+        ml for why these changes were made.
+
