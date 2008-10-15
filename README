@@ -168,3 +168,6 @@ VERSION
         http://www.xray.mpe.mpg.de/mailing-lists/modules/2005-12/msg00112.ht
         ml for why these changes were made.
 
+    Version 0.12    Oct 15, 2008
+        Final version.  As of this version String::Util is no longer
+        under development or being supported.

@@ -491,15 +491,20 @@ Initial release
 
 This is a non-backwards compatible version.
 
-urldecode, urlencode were removed entirely.  All of the subs that used used to
+urldecode, urlencode were removed entirely.  All of the subs that used to
 modify values in place were changed so that they do not do so anymore, except
 for fullchomp.
 
 See http://www.xray.mpe.mpg.de/mailing-lists/modules/2005-12/msg00112.html
 for why these changes were made.
 
+=item Version 0.12    Oct 15, 2008
+
+Final version.  As of this version String::Util is no longer under development
+or being supported.
+
+
 =back
 
 
 =cut
-
